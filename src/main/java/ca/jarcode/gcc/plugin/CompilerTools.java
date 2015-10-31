@@ -106,7 +106,7 @@ public class CompilerTools {
 	}
 
 	public static boolean arch32() {
-		return System.getProperty("os.arch").contains("86") && System.getProperty("os.arch").contains("x64_86");
+		return System.getProperty("os.arch").contains("86") && !System.getProperty("os.arch").contains("x64_86");
 	}
 
 	public static CompileTarget getNativeTarget() {
