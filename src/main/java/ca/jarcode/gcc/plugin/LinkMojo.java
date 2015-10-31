@@ -60,7 +60,7 @@ public class LinkMojo extends AbstractMojo {
 	public void execute(CompileTarget target) throws MojoExecutionException, MojoFailureException {
 		getLog().info("Compiling native target: " + target);
 
-		objectsTargetFolder = new File(objectsTargetFolder, target.name());
+		File processedTargetFolder = new File(objectsTargetFolder, target.name());
 
 		String unformattedTargetName = targetName;
 		String processedTargetName = targetName;
@@ -100,7 +100,7 @@ public class LinkMojo extends AbstractMojo {
 
 		HashMap<String, File> objectFiles = new HashMap<>();
 
-		CompilerTools.forkFind(objectsTargetFolder, objectFiles, true);
+		CompilerTools.forkFind(processedTargetFolder, objectFiles, true);
 
 		String objects = objectFiles.entrySet().stream()
 				.map((entry) -> entry.getValue().getAbsolutePath())

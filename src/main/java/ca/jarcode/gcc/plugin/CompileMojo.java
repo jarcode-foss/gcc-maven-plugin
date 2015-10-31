@@ -50,7 +50,7 @@ public class CompileMojo extends AbstractMojo {
 	public void execute(CompileTarget target) throws MojoExecutionException, MojoFailureException {
 		getLog().info("Linking native target: " + target);
 
-		objectsTargetFolder = new File(objectsTargetFolder, target.name());
+		File processedTargetFolder = new File(objectsTargetFolder, target.name());
 
 		String processedCompiler = compiler;
 		String processedArguments = arguments;
@@ -82,7 +82,7 @@ public class CompileMojo extends AbstractMojo {
 
 			String obj = entry.getKey().substring(0, entry.getKey().length() - ext) + ".o";
 
-			String targetFolder = objectsTargetFolder.getAbsolutePath();
+			String targetFolder = processedTargetFolder.getAbsolutePath();
 			if (!targetFolder.trim().endsWith(File.separator))
 				targetFolder += File.separator;
 
