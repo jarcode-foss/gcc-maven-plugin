@@ -9,16 +9,19 @@ import org.apache.maven.plugins.annotations.Parameter;
 
 import java.io.File;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 @Mojo(name = "compile")
+@SuppressWarnings("unused")
 public class CompileMojo extends AbstractMojo {
 
 	@Parameter(defaultValue = "src/main/c")
 	private File sourceFolder;
 
-	@Parameter(defaultValue = "cc")
+	@Parameter(defaultValue = "*")
 	private String compiler;
 
 	@Parameter(defaultValue = "target/objects")
@@ -36,9 +39,27 @@ public class CompileMojo extends AbstractMojo {
 	@Parameter(defaultValue = "${project.basedir}")
 	private File workingDirectory;
 
+	@Parameter(defaultValue = "native")
+	private String targetPlatforms;
+
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		getLog().info("Compiling .c and .cpp source files");
+		CompilerTools.handleTargets(targetPlatforms, this::execute, getLog());
+	}
+
+	public void execute(CompileTarget target) throws MojoExecutionException, MojoFailureException {
+		getLog().info("Linking native target: " + target);
+
+		String processedCompiler = compiler;
+		String processedArguments = arguments;
+
+		if (compiler.equals("*")) {
+			processedCompiler = CompilerTools.compiler(target);
+		}
+
+		String[] extra = CompilerTools.extraFlags(target);
+
+		processedArguments += extra == null ? "" : " " + Arrays.asList(extra).stream().collect(Collectors.joining(" "));
 
 		// <Mapping, File>
 		HashMap<String, File> sourceFiles = new HashMap<>();
@@ -71,9 +92,10 @@ public class CompileMojo extends AbstractMojo {
 				throw new MojoFailureException("compile mojo failed");
 			}
 
-			int result = CompilerTools.EXECUTOR.exec(compiler + "\0" + compileOnlyFlag + "\0" +
-					arguments.replace(" ", "\0") + "\0" + entry.getValue().getAbsolutePath() +
-					"\0" + outputFlag + targetFolder + obj, getLog(), workingDirectory);
+			int result = CompilerTools.EXECUTOR.exec(processedCompiler + "\0" + compileOnlyFlag + "\0" +
+					processedArguments.replace(" ", "\0") + "\0" + entry.getValue().getAbsolutePath() + "\0"
+					+ outputFlag + (target == CompileTarget.OSX ? " " : "") + // yes, there is a space only for OSX.
+					targetFolder + obj, getLog(), workingDirectory);
 
 			if (result != 0) {
 				getLog().error(String.format("Failed to compile source file (exit code %d)", result));
