@@ -60,6 +60,8 @@ public class LinkMojo extends AbstractMojo {
 	public void execute(CompileTarget target) throws MojoExecutionException, MojoFailureException {
 		getLog().info("Compiling native target: " + target);
 
+		objectsTargetFolder = new File(objectsTargetFolder, target.name());
+
 		String unformattedTargetName = targetName;
 		String processedTargetName = targetName;
 		String processedLibraryFlag = libraryFlag;

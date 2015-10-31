@@ -50,6 +50,8 @@ public class CompileMojo extends AbstractMojo {
 	public void execute(CompileTarget target) throws MojoExecutionException, MojoFailureException {
 		getLog().info("Linking native target: " + target);
 
+		objectsTargetFolder = new File(objectsTargetFolder, target.name());
+
 		String processedCompiler = compiler;
 		String processedArguments = arguments;
 
